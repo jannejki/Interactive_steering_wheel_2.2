@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+*.hex
+*.emSession
+
+pca10040/blank/ses/Output/
