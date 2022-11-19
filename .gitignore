@@ -32,5 +32,7 @@
 *.app
 *.hex
 *.emSession
+*.jlink
 
 pca10040/blank/ses/Output/
+pca10040/blank/ses/Interactive_steering_wheel_2.2_Debug.jlink
