@@ -14,6 +14,7 @@
 #define BTN_1    13
 #define BTN_2    12
 #define BTN_3    11
+
 #define JOY_0    15
 #define JOY_1    16
 #define JOY_2    17
@@ -23,7 +24,7 @@
 #define POT_0    4
 #define POT_1    5
 //TWI display for display, plus control pins
-#define SCLK     8
+#define SCLKPIN    8
 #define SDAPIN   7
 #define RES_DISP 6
 #define SA0      9
