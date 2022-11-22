@@ -5,7 +5,7 @@
  Version     : 2.2
  Copyright   :
  Description :
- Path        : ../segger/examples/projects/steering-wheel-freertos/pca10040/blank/ses/main.cpp
+ Path        : ..segger\examples\projects\Interactive_steering_wheel_2.2\pca10040\blank\ses\main.cpp
  ===============================================================================
  */
 
@@ -54,28 +54,38 @@ static void buttonExampleTask(void *pvParameter) {
 
   while (true) {
     led.write(true);
-    nrf_delay_ms(TASK_DELAY);
+    vTaskDelay(TASK_DELAY);
     led.write(false);
-    nrf_delay_ms(TASK_DELAY);
+    vTaskDelay(TASK_DELAY);
   }
 }
 
 static void displayExampleTask(void *pvParameter) {
-  I2C i2c;
-  Display display(&i2c);
-  Potentiometer pot(NRF_SAADC_INPUT_AIN2);
+  I2C *i2c = static_cast<I2C *>(pvParameter);
+  Display display(i2c);
 
+  Potentiometer pot(NRF_SAADC_INPUT_AIN2, 5);
+
+  char buff2[50];
   char buff[50];
+
   nrf_saadc_value_t adc_val;
+  float sector;
 
   while (true) {
-    adc_val = pot.readValue();
+    display.clearScreen();
 
-    sprintf(buff, "\nPot val: %d", adc_val);
+    adc_val = pot.readRawValue();
+    sprintf(buff, "Pot val: %d ", adc_val);
+
+    sector = pot.readSector();
+    sprintf(buff2, "section: %d", (int)sector);
+
     display.sendString(buff);
+    display.setCursor(0, 1);
+    display.sendString(buff2);
 
     vTaskDelay(500);
-    display.clearScreen();
   }
 }
 
@@ -89,11 +99,15 @@ int main(void) {
   err_code = nrf_drv_clock_init();
   APP_ERROR_CHECK(err_code);
 
-  /* Create task for blinking led with priority set to 2 */
-  xTaskCreate(buttonExampleTask, "buttonExampleTask", configMINIMAL_STACK_SIZE + 128, NULL, 2, NULL);
+  I2C *i2c = new I2C();
 
   /* Create task for display task with priority set to 2 */
-  xTaskCreate(displayExampleTask, "displayExampleTask", configMINIMAL_STACK_SIZE + 128, NULL, 2, NULL);
+  xTaskCreate(displayExampleTask, "displayExampleTask", configMINIMAL_STACK_SIZE + 128, i2c, (tskIDLE_PRIORITY + 1UL),
+              (TaskHandle_t *)NULL);
+
+  /* Create task for blinking led with priority set to 2 */
+  xTaskCreate(buttonExampleTask, "buttonExampleTask", configMINIMAL_STACK_SIZE + 128, NULL, (tskIDLE_PRIORITY + 1UL),
+              (TaskHandle_t *)NULL);
 
   /* Start FreeRTOS scheduler. */
   vTaskStartScheduler();

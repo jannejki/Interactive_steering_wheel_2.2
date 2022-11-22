@@ -1,16 +1,26 @@
 #include "Potentiometer.h"
 
-Potentiometer::Potentiometer(nrf_saadc_input_t _input) : input(_input) {
+Potentiometer::Potentiometer(nrf_saadc_input_t _input, int _secW) : input(_input), sectionWidth(_secW) {
   saadc_init();
 }
 
 Potentiometer::~Potentiometer() {
 }
 
-nrf_saadc_value_t Potentiometer::readValue() {
+nrf_saadc_value_t Potentiometer::readRawValue() {
   nrf_saadc_value_t adc_val;
   nrfx_saadc_sample_convert(0, &adc_val);
   return adc_val;
+}
+
+float Potentiometer::readSector() {
+  nrf_saadc_value_t adc_val;
+  float result;
+  nrfx_saadc_sample_convert(0, &adc_val);
+  result = ((float)adc_val/maxVal)*100.0;
+  float mod = (int)result % sectionWidth;
+  result = result - mod;
+  return result;
 }
 
 /*****************************************************************************

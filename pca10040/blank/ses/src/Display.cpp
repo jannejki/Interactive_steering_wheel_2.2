@@ -51,13 +51,11 @@ void Display::init() {
 void Display::sendCmd(uint8_t data) {
   uint8_t data_t[] = {0x80, data};
   i2c->sendData(data_t, LCD_SLAVE_ADDR, sizeof(data_t));
-  nrf_delay_ms(1);
 }
 
 void Display::sendData(uint8_t data) {
   uint8_t data_t[] = {0x40, data};
   i2c->sendData(data_t, LCD_SLAVE_ADDR, sizeof(data_t));
-  nrf_delay_ms(1);
 }
 
 void Display::sendString(char string[80]) {
