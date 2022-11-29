@@ -13,13 +13,20 @@ nrf_saadc_value_t Potentiometer::readRawValue() {
   return adc_val;
 }
 
-float Potentiometer::readSector() {
+int Potentiometer::readSector() {
   nrf_saadc_value_t adc_val;
-  float result;
+  nrf_saadc_value_t averageVal;
+  int result;
+
   nrfx_saadc_sample_convert(0, &adc_val);
-  result = ((float)adc_val/maxVal)*100.0;
-  float mod = (int)result % sectionWidth;
+
+  adc_val = adc_val + offset;
+  result = ((float)adc_val / maxVal) * 100.0;
+  float mod = result % sectionWidth;
   result = result - mod;
+
+  float step = 100.0 / (sectionWidth - 1);
+
   return result;
 }
 

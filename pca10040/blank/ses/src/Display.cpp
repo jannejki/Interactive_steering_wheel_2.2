@@ -58,7 +58,7 @@ void Display::sendData(uint8_t data) {
   i2c->sendData(data_t, LCD_SLAVE_ADDR, sizeof(data_t));
 }
 
-void Display::sendString(char string[80]) {
+void Display::print(char string[80]) {
   uint8_t length = strlen(string);
   for (uint8_t i = 0; i < length; i++) {
     sendData(string[i]);

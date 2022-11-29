@@ -18,7 +18,7 @@ public:
   void init();
   void sendCmd(uint8_t data);
   void sendData(uint8_t data);
-  void sendString(char string[80]);
+  void print(char string[80]);
   void setCursor(int x, int y);
   void clearScreen();
 

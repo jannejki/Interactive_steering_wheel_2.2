@@ -103,6 +103,12 @@
         <file file_name="headers/I2C.h" />
         <file file_name="headers/Potentiometer.h" />
         <file file_name="headers/Joystick.h" />
+        <file file_name="headers/Tasks.h" />
+      </folder>
+      <folder Name="Tasks">
+        <file file_name="Tasks/LEDTask.cpp" />
+        <file file_name="Tasks/WatchDog.cpp" />
+        <file file_name="Tasks/MenuTask.cpp" />
       </folder>
     </folder>
     <folder Name="None">

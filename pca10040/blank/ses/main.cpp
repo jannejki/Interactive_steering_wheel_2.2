@@ -24,6 +24,7 @@
 #include "nrf_delay.h"
 #include "nrf_drv_clock.h"
 #include "nrf_drv_twi.h"
+#include "queue.h"
 #include "sdk_config.h"
 #include "sdk_errors.h"
 #include "task.h"
@@ -34,64 +35,27 @@
 /*****************************************************************************
  * Steering Wheel -specific includes
  ****************************************************************************/
-#include "DigitalIOPin.h"
-#include "Display.h"
-#include "I2C.h"
-#include "Potentiometer.h"
+#include "Tasks.h"
 
 /*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
-#define TASK_DELAY 500 /**< Task delay. Delays a LED0 task for 500 ms */
+QueueHandle_t LEDQueue;
+EventBits_t monitorBits;
+EventGroupHandle_t taskStatusBitGroup;
 
-/*****************************************************************************
- * Tasks
- ****************************************************************************/
-static void buttonExampleTask(void *pvParameter) {
-  DigitalIOPin led(LED_BLU, DigitalIOPin::output, DigitalIOPin::pullup);
-  xTaskGetTickCount();
-  int i = 0;
-
-  while (true) {
-    led.write(true);
-    vTaskDelay(TASK_DELAY);
-    led.write(false);
-    vTaskDelay(TASK_DELAY);
-  }
-}
-
-static void displayExampleTask(void *pvParameter) {
-  I2C *i2c = static_cast<I2C *>(pvParameter);
-  Display display(i2c);
-
-  Potentiometer pot(NRF_SAADC_INPUT_AIN2, 5);
-
-  char buff2[50];
-  char buff[50];
-
-  nrf_saadc_value_t adc_val;
-  float sector;
-
-  while (true) {
-    display.clearScreen();
-
-    adc_val = pot.readRawValue();
-    sprintf(buff, "Pot val: %d ", adc_val);
-
-    sector = pot.readSector();
-    sprintf(buff2, "section: %d", (int)sector);
-
-    display.sendString(buff);
-    display.setCursor(0, 1);
-    display.sendString(buff2);
-
-    vTaskDelay(500);
-  }
-}
 
 /*****************************************************************************
  * Public functions
  ****************************************************************************/
+bool initQueues(void) {
+  LEDQueue = xQueueCreate(2, sizeof(Status));
+  if(LEDQueue == NULL) {
+    return false;
+  }
+  return true;
+}
+
 int main(void) {
   ret_code_t err_code;
 
@@ -100,13 +64,20 @@ int main(void) {
   APP_ERROR_CHECK(err_code);
 
   I2C *i2c = new I2C();
+  initQueues();
+
+  taskStatusBitGroup = xEventGroupCreate();
 
   /* Create task for display task with priority set to 2 */
-  xTaskCreate(displayExampleTask, "displayExampleTask", configMINIMAL_STACK_SIZE + 128, i2c, (tskIDLE_PRIORITY + 1UL),
+  xTaskCreate(MenuTask, "Menu", configMINIMAL_STACK_SIZE + 128, i2c, (tskIDLE_PRIORITY + 1UL),
               (TaskHandle_t *)NULL);
 
   /* Create task for blinking led with priority set to 2 */
-  xTaskCreate(buttonExampleTask, "buttonExampleTask", configMINIMAL_STACK_SIZE + 128, NULL, (tskIDLE_PRIORITY + 1UL),
+  xTaskCreate(LEDTask, "LEDTask", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY),
+              (TaskHandle_t *)NULL);
+
+                /* Create task for blinking led with priority set to 2 */
+  xTaskCreate(WatchDogTask, "WatchDog", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY) + 2UL,
               (TaskHandle_t *)NULL);
 
   /* Start FreeRTOS scheduler. */
