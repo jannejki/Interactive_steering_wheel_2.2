@@ -109,6 +109,8 @@
         <file file_name="Tasks/LEDTask.cpp" />
         <file file_name="Tasks/WatchDog.cpp" />
         <file file_name="Tasks/MenuTask.cpp" />
+        <file file_name="ApplicationTask.cpp" />
+        <file file_name="ECUTask.cpp" />
       </folder>
     </folder>
     <folder Name="None">

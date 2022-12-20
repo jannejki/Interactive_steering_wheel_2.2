@@ -15,12 +15,18 @@
 #include "Display.h"
 #include "Potentiometer.h"
 #include "board_prod.h"
+/*****************************************************************************
+ * Functions in task files
+ ****************************************************************************/
+void taskTimeOutCallback(TimerHandle_t xTimer);
 
 
 /*****************************************************************************
  * Task Definitions
  ****************************************************************************/
-void LEDTask(void *pvParameter);
-void MenuTask(void *pvParameter);
-void WatchDogTask(void *pvParameter);
+void ApplicationTask  (void *pvParameter);
+void ECUTask          (void *pvParameter);
+void LEDTask          (void *pvParameter);
+void MenuTask         (void *pvParameter);
+void WatchDogTask     (void *pvParameter);
 #endif

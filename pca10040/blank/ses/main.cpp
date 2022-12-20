@@ -40,21 +40,12 @@
 /*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
-QueueHandle_t LEDQueue;
-EventBits_t monitorBits;
 EventGroupHandle_t taskStatusBitGroup;
-
+TimerHandle_t taskTimeoutTimer;
 
 /*****************************************************************************
  * Public functions
  ****************************************************************************/
-bool initQueues(void) {
-  LEDQueue = xQueueCreate(2, sizeof(Status));
-  if(LEDQueue == NULL) {
-    return false;
-  }
-  return true;
-}
 
 int main(void) {
   ret_code_t err_code;
@@ -63,21 +54,22 @@ int main(void) {
   err_code = nrf_drv_clock_init();
   APP_ERROR_CHECK(err_code);
 
-  I2C *i2c = new I2C();
-  initQueues();
-
   taskStatusBitGroup = xEventGroupCreate();
+  taskTimeoutTimer = xTimerCreate("Task timeout", WATCHDOG_TIMEOUT, pdFALSE, (void *)0, taskTimeOutCallback);
 
-  /* Create task for display task with priority set to 2 */
-  xTaskCreate(MenuTask, "Menu", configMINIMAL_STACK_SIZE + 128, i2c, (tskIDLE_PRIORITY + 1UL),
+  xTaskCreate(ECUTask, "ECUTask", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1UL),
               (TaskHandle_t *)NULL);
 
-  /* Create task for blinking led with priority set to 2 */
-  xTaskCreate(LEDTask, "LEDTask", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY),
+  xTaskCreate(ApplicationTask, "Application", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1UL),
               (TaskHandle_t *)NULL);
 
-                /* Create task for blinking led with priority set to 2 */
-  xTaskCreate(WatchDogTask, "WatchDog", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY) + 2UL,
+  xTaskCreate(MenuTask, "Menu", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1UL),
+              (TaskHandle_t *)NULL);
+
+  xTaskCreate(LEDTask, "LEDTask", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY + 1UL),
+              (TaskHandle_t *)NULL);
+
+  xTaskCreate(WatchDogTask, "WatchDog", configMINIMAL_STACK_SIZE, NULL, (tskIDLE_PRIORITY) + 1UL,
               (TaskHandle_t *)NULL);
 
   /* Start FreeRTOS scheduler. */

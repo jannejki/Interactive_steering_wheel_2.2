@@ -6,6 +6,8 @@
 #include "nordic_common.h"
 #include "nrf_gpio.h"
 #include "queue.h"
+#include <mutex>
+#include "semphr.h"
 
 /*****************************************************************************
  * Board pins
@@ -43,27 +45,76 @@
 #define SA0 9
 
 /*****************************************************************************
- * Timers
+ * Times
  ****************************************************************************/
 #define TASK_DELAY 500
 #define WATCHDOG_TIMEOUT 10000
 
+
 /*****************************************************************************
  * Task monitoring flags
  ****************************************************************************/
-#define LEDBIT (1 << 0)
-#define MENUBIT (1 << 1)
-#define ALLTASKS (LEDBIT | MENUBIT)
+#define ECUBIT   (1 << 0)
+#define LEDBIT   (1 << 1)
+#define MENUBIT  (1 << 2)
+#define APPBIT   (1 << 3)
+#define ALLBITS  (ECUBIT | LEDBIT | MENUBIT | APPBIT)
 
 /*****************************************************************************
  * Public variables
  ****************************************************************************/
-enum Status { OK,
-              DISCONNECTED,
-              TASK_FAIL,
-              STARTUP };
+ /*
+enum Status {
+  OK,
+  DISCONNECTED,
+  TASK_FAIL,
+  STARTUP
+};
+
+// dummy modes, change names to correct ones
+enum Mode {
+  MODE1 = 0,
+  MODE2 = 1,
+  MODE3 = 2,
+};
+
+struct AppMode {
+  Status status;
+  Mode mode;
+};
+
+struct messageToMenu {
+  bool RW;
+  AppMode *app;
+  uint8_t rxData;
+  uint8_t memory;
+};
+
+struct MessageFromMenu {
+  bool RW;
+  uint8_t txData;
+  Mode mode;
+  uint8_t memory;
+};
+
+struct MessageToECU {
+  bool RW;
+  uint8_t memory;
+  uint8_t *data;
+};
+
+struct MessageFromECU {
+  bool RW;
+  int rxData;
+  uint16_t i2cStatus;
+  uint8_t memory;
+};
 
 extern QueueHandle_t LEDQueue;
 extern EventBits_t monitorBits;
+extern SemaphoreHandle_t startSemaphore;*/
+
 extern EventGroupHandle_t taskStatusBitGroup;
+extern TimerHandle_t taskTimeoutTimer;
+
 #endif
